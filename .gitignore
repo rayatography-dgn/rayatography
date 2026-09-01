@@ -1,0 +1,22 @@
+# Dependencies & OS Files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Large source archive
+Variation_1_All_Frames_24fps_HighQuality.zip
+*.mp4
+*.jpeg
+
+# Helper scratch scripts
+check_pixels.ps1
+crop_alpha_logo.ps1
+crop_exact_logo.ps1
+process_logo.ps1
+process_logo_tight.ps1
+download_behance_covers.ps1
+fetch_behance.ps1
+extract_frames.py
+install_mingit.ps1
+push_repo.ps1
