@@ -617,7 +617,9 @@
 
           <!-- Contact Form -->
           <div class="contact-right-col">
-            <form class="contact-form" id="contact-form" onsubmit="event.preventDefault(); handleFormSubmit();">
+            <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true">
+              <input type="hidden" name="form-name" value="contact" />
+
               <div class="form-group">
                 <label for="name" class="form-label">Your Name</label>
                 <input type="text" id="name" name="name" class="form-input" placeholder="Enter your name" required />
@@ -630,7 +632,7 @@
 
               <div class="form-group">
                 <label for="service-select" class="form-label">Interested In</label>
-                <select id="service-select" name="service" class="form-select">
+                <select id="service-select" name="interested-in" class="form-select">
                   <option value="Creative Direction">Creative Direction</option>
                   <option value="Brand Identity">Brand Identity</option>
                   <option value="Campaign Design">Campaign Design</option>
@@ -642,7 +644,7 @@
 
               <div class="form-group">
                 <label for="message" class="form-label">Project Details</label>
-                <textarea id="message" name="message" rows="4" class="form-textarea" placeholder="Tell me about your project, goals, and timeline..." required></textarea>
+                <textarea id="message" name="project-details" rows="4" class="form-textarea" placeholder="Tell me about your project, goals, and timeline..." required></textarea>
               </div>
 
               <button type="submit" class="btn-submit" id="submit-btn">
