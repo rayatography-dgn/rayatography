@@ -403,27 +403,6 @@
   }
 
   /**
-   * Form submission feedback handler.
-   */
-  window.handleFormSubmit = function () {
-    const feedback = document.getElementById('form-feedback');
-    const submitBtn = document.getElementById('submit-btn');
-
-    if (feedback && submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.7';
-      feedback.textContent = 'Thank you! Your inquiry has been sent to withkreato.rayatography@gmail.com.';
-
-      setTimeout(() => {
-        document.getElementById('contact-form')?.reset();
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-        feedback.textContent = '';
-      }, 5000);
-    }
-  };
-
-  /**
    * Smooth Anchor Navigation Handler.
    */
   function initSmoothNav() {
