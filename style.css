@@ -156,7 +156,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.7s var(--transition-smooth), visibility 0.7s var(--transition-smooth);
+  transition: opacity 0.45s var(--transition-smooth), visibility 0.45s var(--transition-smooth);
 }
 
 .loader-container.loaded {

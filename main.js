@@ -294,43 +294,107 @@
     });
   }
 
+  const CRITICAL_FRAMES_COUNT = 6;
+  let isLoaderDismissed = false;
+
   /**
-   * Preloads all 240 frames progressively.
+   * Dismisses the preloader screen smoothly and reveals the exhibition.
+   */
+  function dismissLoader() {
+    if (isLoaderDismissed) return;
+    isLoaderDismissed = true;
+
+    if (loaderProgressBar) loaderProgressBar.style.width = '100%';
+    if (loaderPercent) loaderPercent.textContent = '100%';
+
+    setTimeout(() => {
+      if (loader) loader.classList.add('loaded');
+      onScroll();
+    }, 150);
+  }
+
+  /**
+   * High-Performance Instant Preloader & Background Frame Streaming.
+   * Unblocks the exhibition immediately upon loading first critical frames (<800ms),
+   * then streams remaining frames asynchronously in background.
    */
   function preloadFrames() {
-    const onFrameLoad = (index) => {
-      loadedCount++;
-      const percent = Math.round((loadedCount / TOTAL_FRAMES) * 100);
+    let criticalLoaded = 0;
 
+    // Hard fallback timeout: Reveal website in under 900ms regardless of slow networks
+    const maxWaitTimer = setTimeout(() => {
+      dismissLoader();
+    }, 900);
+
+    const updateLoaderProgress = () => {
+      if (isLoaderDismissed) return;
+      const percent = Math.min(100, Math.round((criticalLoaded / CRITICAL_FRAMES_COUNT) * 100));
       if (loaderProgressBar) loaderProgressBar.style.width = `${percent}%`;
       if (loaderPercent) loaderPercent.textContent = `${percent}%`;
 
-      if (index === 0 && !isFirstFrameDrawn) {
-        isFirstFrameDrawn = true;
-        renderFrame(0, true);
-      }
-
-      if (loadedCount >= TOTAL_FRAMES) {
-        setTimeout(() => {
-          if (loader) loader.classList.add('loaded');
-          onScroll();
-        }, 200);
+      if (criticalLoaded >= CRITICAL_FRAMES_COUNT) {
+        clearTimeout(maxWaitTimer);
+        dismissLoader();
       }
     };
 
-    const firstImg = new Image();
-    firstImg.src = getFramePath(1);
-    firstImg.onload = () => onFrameLoad(0);
-    firstImg.onerror = () => onFrameLoad(0);
-    images[0] = firstImg;
-
-    for (let i = 1; i < TOTAL_FRAMES; i++) {
+    function loadSingleFrame(i, isCritical = false) {
+      if (images[i]) return;
       const img = new Image();
       img.src = getFramePath(i + 1);
-      img.onload = () => onFrameLoad(i);
-      img.onerror = () => onFrameLoad(i);
+      img.onload = () => {
+        loadedCount++;
+        if (i === 0 && !isFirstFrameDrawn) {
+          isFirstFrameDrawn = true;
+          renderFrame(0, true);
+        }
+        if (isCritical) {
+          criticalLoaded++;
+          updateLoaderProgress();
+        }
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (isCritical) {
+          criticalLoaded++;
+          updateLoaderProgress();
+        }
+      };
       images[i] = img;
     }
+
+    // Step 1: Immediately load the first critical frames
+    for (let i = 0; i < CRITICAL_FRAMES_COUNT; i++) {
+      loadSingleFrame(i, true);
+    }
+
+    // Step 2: Progressively stream milestone frames and rest of the sequence in background
+    setTimeout(() => {
+      for (let i = CRITICAL_FRAMES_COUNT; i < TOTAL_FRAMES; i += 8) {
+        loadSingleFrame(i, false);
+      }
+
+      let nextBatchIndex = CRITICAL_FRAMES_COUNT;
+      function streamRemaining() {
+        const batchSize = 12;
+        let count = 0;
+        while (nextBatchIndex < TOTAL_FRAMES && count < batchSize) {
+          if (!images[nextBatchIndex]) {
+            loadSingleFrame(nextBatchIndex, false);
+            count++;
+          }
+          nextBatchIndex++;
+        }
+        if (nextBatchIndex < TOTAL_FRAMES) {
+          if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(streamRemaining);
+          } else {
+            setTimeout(streamRemaining, 35);
+          }
+        }
+      }
+      setTimeout(streamRemaining, 80);
+    }, 150);
   }
 
   /**
